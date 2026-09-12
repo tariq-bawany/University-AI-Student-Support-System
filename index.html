@@ -1,0 +1,474 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SZABIST University - Student Portal</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Font: Plus Jakarta Sans -->
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap"
+        rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+        }
+
+        /* Markdown Visual Styling inside Chat Bubbles */
+        .markdown-body h3 {
+            font-size: 0.85rem;
+            font-weight: 700;
+            color: #002b49;
+            margin-top: 0.5rem;
+            margin-bottom: 0.25rem;
+        }
+
+        .markdown-body ul {
+            list-style-type: disc;
+            padding-left: 1.25rem;
+            margin-top: 0.25rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .markdown-body table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 0.5rem 0;
+            font-size: 0.75rem;
+            background-color: #f8fafc;
+            border-radius: 0.5rem;
+            overflow: hidden;
+            border: 1px solid #e2e8f0;
+        }
+
+        .markdown-body th {
+            background-color: #f1f5f9;
+            color: #0f172a;
+            font-weight: 600;
+            text-align: left;
+            padding: 6px 10px;
+            border-bottom: 1px solid #e2e8f0;
+        }
+
+        .markdown-body td {
+            padding: 6px 10px;
+            border-bottom: 1px solid #f1f5f9;
+            color: #334155;
+        }
+
+        .markdown-body blockquote {
+            background-color: #fffbeb;
+            border-left: 3px solid #f59e0b;
+            color: #b45309;
+            padding: 6px 10px;
+            border-radius: 0 0.5rem 0.5rem 0;
+            margin: 0.5rem 0;
+            font-size: 0.75rem;
+        }
+
+        .szabist-navy {
+            background-color: #002b49;
+        }
+
+        .text-szabist-navy {
+            color: #002b49;
+        }
+
+        .border-szabist-navy {
+            border-color: #002b49;
+        }
+
+        /* Smooth transitions for widget toggle */
+        #chatPanel {
+            transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        #chatPanel.chat-hidden {
+            opacity: 0;
+            transform: translateY(16px) scale(0.95);
+            pointer-events: none;
+        }
+
+        #chatPanel.chat-visible {
+            opacity: 1;
+            transform: translateY(0) scale(1);
+            pointer-events: auto;
+        }
+    </style>
+</head>
+
+<body class="bg-slate-50 text-slate-800 min-h-screen flex flex-col justify-between">
+
+    <!-- DEMO UNIVERSITY LANDING PAGE -->
+    <div>
+        <!-- Navbar -->
+        <header class="bg-white border-b border-slate-200 sticky top-0 z-30">
+            <div class="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between">
+                <div class="flex items-center space-x-3">
+                    <div
+                        class="w-10 h-10 szabist-navy text-white rounded-xl flex items-center justify-center font-bold text-xl shadow-md">
+                        S
+                    </div>
+                    <div>
+                        <span class="text-lg font-bold text-slate-900 tracking-tight block leading-none">SZABIST</span>
+                        <span class="text-xs text-slate-500 font-medium">University Portal</span>
+                    </div>
+                </div>
+                <nav class="hidden md:flex items-center space-x-8 text-sm font-semibold text-slate-600">
+                    <a href="#" class="text-szabist-navy">Academics</a>
+                    <a href="#" class="hover:text-slate-900 transition">Admissions</a>
+                    <a href="#" class="hover:text-slate-900 transition">Examinations</a>
+                    <a href="#" class="hover:text-slate-900 transition">Student Life</a>
+                </nav>
+                <div class="flex items-center space-x-3">
+                    <button
+                        class="text-xs font-semibold px-4 py-2.5 rounded-lg border border-slate-300 text-slate-700 hover:bg-slate-100 transition">ZABDESK
+                        Login</button>
+                </div>
+            </div>
+        </header>
+
+        <!-- Hero Section -->
+        <main class="max-w-7xl mx-auto px-6 py-16">
+            <div class="bg-white border border-slate-200 rounded-3xl p-10 md:p-16 shadow-sm relative overflow-hidden">
+                <div class="max-w-2xl relative z-10">
+                    <span
+                        class="text-xs font-bold uppercase tracking-wider text-amber-600 bg-amber-50 border border-amber-200 px-3 py-1 rounded-full inline-block mb-4">Official
+                        Student Services</span>
+                    <h1 class="text-4xl md:text-5xl font-extrabold text-slate-900 tracking-tight leading-tight mb-6">
+                        Welcome to SZABIST Student Support
+                    </h1>
+                    <p class="text-slate-600 text-base md:text-lg mb-8 leading-relaxed">
+                        Access course registration, examination timetables, fee schedules, and administrative resources.
+                        Need immediate help? Use our AI Assistant located at the bottom right.
+                    </p>
+                    <div class="flex flex-wrap gap-4">
+                        <a href="#"
+                            class="szabist-navy hover:bg-slate-800 text-white text-sm font-semibold px-6 py-3 rounded-xl transition shadow-sm">Academic
+                            Calendar</a>
+                        <a href="#"
+                            class="bg-slate-100 hover:bg-slate-200 text-slate-700 text-sm font-semibold px-6 py-3 rounded-xl transition">Fee
+                            Structure</a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Quick Access Services -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mt-10">
+                <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm hover:shadow-md transition">
+                    <div
+                        class="w-12 h-12 rounded-xl bg-blue-50 text-blue-900 flex items-center justify-center text-xl mb-4">
+                        <i class="fa-solid fa-graduation-cap"></i>
+                    </div>
+                    <h3 class="font-bold text-slate-900 mb-1">Academics & Registration</h3>
+                    <p class="text-xs text-slate-500 leading-relaxed">Course allocations, add/drop forms, and attendance
+                        policies.</p>
+                </div>
+                <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm hover:shadow-md transition">
+                    <div
+                        class="w-12 h-12 rounded-xl bg-emerald-50 text-emerald-900 flex items-center justify-center text-xl mb-4">
+                        <i class="fa-solid fa-file-invoice-dollar"></i>
+                    </div>
+                    <h3 class="font-bold text-slate-900 mb-1">Finance & Accounts</h3>
+                    <p class="text-xs text-slate-500 leading-relaxed">Challan generation, installment requests, and fee
+                        deadlines.</p>
+                </div>
+                <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm hover:shadow-md transition">
+                    <div
+                        class="w-12 h-12 rounded-xl bg-amber-50 text-amber-900 flex items-center justify-center text-xl mb-4">
+                        <i class="fa-solid fa-clipboard-list"></i>
+                    </div>
+                    <h3 class="font-bold text-slate-900 mb-1">Examinations & Records</h3>
+                    <p class="text-xs text-slate-500 leading-relaxed">Transcript requests, admit cards, and grade
+                        rechecking.</p>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Footer -->
+    <footer class="border-t border-slate-200 bg-white py-6 text-center text-xs text-slate-400">
+        © 2026 SZABIST University. Student Support Pipeline Concept.
+    </footer>
+
+
+    <!-- ================================================================= -->
+    <!-- FLOATING CHATBOT WIDGET (STANDARD BOTTOM-RIGHT PATTERN) -->
+    <!-- ================================================================= -->
+
+    <!-- Floating Trigger Button -->
+    <button id="chatToggleBtn" onclick="toggleChat()"
+        class="fixed bottom-6 right-6 z-50 szabist-navy hover:bg-slate-800 text-white w-14 h-14 rounded-full shadow-2xl flex items-center justify-center transition-all duration-300 transform hover:scale-105 focus:outline-none">
+        <i id="chatIcon" class="fa-solid fa-comment-dots text-xl"></i>
+        <i id="closeIcon" class="fa-solid fa-xmark text-xl hidden"></i>
+        <span class="absolute -top-1 -right-1 w-3.5 h-3.5 bg-green-500 border-2 border-white rounded-full"></span>
+    </button>
+
+    <!-- Expanded Chat Window -->
+    <div id="chatPanel"
+        class="chat-hidden fixed bottom-24 right-6 z-50 w-[380px] max-w-[calc(100vw-2rem)] h-[560px] bg-white rounded-2xl shadow-2xl border border-slate-200 flex flex-col overflow-hidden">
+
+        <!-- Chat Header -->
+        <div class="szabist-navy text-white p-4 flex items-center justify-between border-b border-slate-800">
+            <div class="flex items-center space-x-3">
+                <div class="relative">
+                    <div
+                        class="w-9 h-9 rounded-full bg-white/10 text-white flex items-center justify-center font-bold text-sm border border-white/20">
+                        <i class="fa-solid fa-robot"></i>
+                    </div>
+                    <span
+                        class="absolute bottom-0 right-0 w-2.5 h-2.5 bg-green-400 border-2 border-[#002b49] rounded-full"></span>
+                </div>
+                <div>
+                    <h2 class="text-sm font-bold tracking-wide leading-none">SZABIST Support AI</h2>
+                    <span class="text-[11px] text-slate-300">RAG & Administrative Assistant</span>
+                </div>
+            </div>
+            <button onclick="toggleChat()" class="text-slate-300 hover:text-white text-sm p-1 rounded-lg transition">
+                <i class="fa-solid fa-minus"></i>
+            </button>
+        </div>
+
+        <!-- Quick Suggestion Chips -->
+        <div
+            class="bg-slate-50/80 border-b border-slate-200 px-3 py-2 flex space-x-1.5 overflow-x-auto text-[11px] scrollbar-none">
+            <button onclick="sendQuickQuery('What are the library timings?')"
+                class="bg-white hover:bg-slate-100 text-slate-600 font-medium px-2.5 py-1 rounded-lg border border-slate-200 shadow-2xs whitespace-nowrap transition">
+                📚 Library Hours
+            </button>
+            <button onclick="sendQuickQuery('I need help with my fee installment')"
+                class="bg-white hover:bg-slate-100 text-slate-600 font-medium px-2.5 py-1 rounded-lg border border-slate-200 shadow-2xs whitespace-nowrap transition">
+                💳 Fee Query
+            </button>
+            <button onclick="sendQuickQuery('How do I apply for transcript?')"
+                class="bg-white hover:bg-slate-100 text-slate-600 font-medium px-2.5 py-1 rounded-lg border border-slate-200 shadow-2xs whitespace-nowrap transition">
+                📝 Transcript
+            </button>
+        </div>
+
+        <!-- Chat History Area -->
+        <div id="chatHistory" class="flex-1 p-4 overflow-y-auto space-y-3.5 bg-slate-50/40 text-xs">
+            <!-- Bot Welcome Message -->
+            <div class="flex items-start space-x-2.5">
+                <div
+                    class="w-7 h-7 rounded-full szabist-navy text-white flex items-center justify-center text-[10px] shrink-0 mt-0.5">
+                    <i class="fa-solid fa-robot"></i>
+                </div>
+                <div
+                    class="bg-white border border-slate-200 text-slate-700 p-3 rounded-2xl rounded-tl-none max-w-[85%] shadow-2xs leading-relaxed">
+                    Hello! I am the SZABIST Support Assistant. Ask me about policies or schedules. If your issue
+                    requires staff action, I can help you log an official ticket.
+                </div>
+            </div>
+        </div>
+
+        <!-- Chat Input Footer -->
+        <div class="p-3 bg-white border-t border-slate-200">
+            <form id="chatForm" onsubmit="handleUserSubmit(event)" class="flex items-center space-x-2">
+                <input type="text" id="userInput" placeholder="Ask a query..." autocomplete="off"
+                    class="flex-1 bg-slate-100 border border-slate-200 rounded-xl px-3.5 py-2 text-xs text-slate-800 placeholder-slate-400 focus:outline-none focus:border-slate-400 focus:bg-white transition">
+                <button type="submit"
+                    class="szabist-navy hover:bg-slate-800 text-white rounded-xl px-3.5 py-2 text-xs font-semibold transition flex items-center justify-center shrink-0">
+                    <i class="fa-solid fa-paper-plane"></i>
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- JAVASCRIPT LOGIC -->
+     <script src="config.js"></script>
+    <script>
+        // REPLACE WITH YOUR ACTUAL GOOGLE FORM LINK
+        const FORM_URL = CONFIG.FORM_URL;
+
+        let isChatOpen = false;
+
+        function toggleChat() {
+            const panel = document.getElementById('chatPanel');
+            const chatIcon = document.getElementById('chatIcon');
+            const closeIcon = document.getElementById('closeIcon');
+
+            isChatOpen = !isChatOpen;
+
+            if (isChatOpen) {
+                panel.classList.remove('chat-hidden');
+                panel.classList.add('chat-visible');
+                chatIcon.classList.add('hidden');
+                closeIcon.classList.remove('hidden');
+                document.getElementById('userInput').focus();
+            } else {
+                panel.classList.remove('chat-visible');
+                panel.classList.add('chat-hidden');
+                chatIcon.classList.remove('hidden');
+                closeIcon.classList.add('hidden');
+            }
+        }
+
+        function appendUserMessage(text) {
+            const chatHistory = document.getElementById('chatHistory');
+            const html = `
+                <div class="flex items-start justify-end">
+                    <div class="szabist-navy text-white p-3 rounded-2xl rounded-tr-none max-w-[85%] shadow-2xs leading-relaxed">
+                        ${escapeHtml(text)}
+                    </div>
+                </div>
+            `;
+            chatHistory.insertAdjacentHTML('beforeend', html);
+            scrollToBottom();
+        }
+
+        function appendBotMessage(text) {
+            const chatHistory = document.getElementById('chatHistory');
+
+            // Parse Markdown text into styled HTML
+            const formattedHtml = typeof marked !== 'undefined' ? marked.parse(text) : text;
+
+            const html = `
+        <div class="flex items-start space-x-2.5">
+            <div class="w-7 h-7 rounded-full szabist-navy text-white flex items-center justify-center text-[10px] shrink-0 mt-0.5">
+                <i class="fa-solid fa-robot"></i>
+            </div>
+            <div class="bg-white border border-slate-200 text-slate-700 p-3 rounded-2xl rounded-tl-none max-w-[88%] shadow-2xs leading-relaxed markdown-body">
+                ${formattedHtml}
+            </div>
+        </div>
+    `;
+            chatHistory.insertAdjacentHTML('beforeend', html);
+            scrollToBottom();
+        }
+
+        function appendEscalationCard(deptName) {
+            const chatHistory = document.getElementById('chatHistory');
+            const FORM_URL = "https://forms.gle/CW1i5joik5YJXDxQA";
+
+            const html = `
+        <div class="flex items-start space-x-2.5">
+            <div class="w-7 h-7 rounded-full bg-amber-500 text-white flex items-center justify-center text-[10px] shrink-0 mt-0.5">
+                <i class="fa-solid fa-headset"></i>
+            </div>
+            <div class="bg-amber-50/90 border border-amber-200 text-amber-900 p-3.5 rounded-2xl rounded-tl-none max-w-[88%] shadow-2xs space-y-2">
+                <p class="font-bold text-xs">Department Ticket Required</p>
+                <p class="text-[11px] text-amber-800 leading-snug">
+                    I cannot process this request directly, but our department staff can help you.
+                </p>
+                <a href="${FORM_URL}" target="_blank" class="inline-flex items-center justify-center space-x-1.5 w-full bg-amber-600 hover:bg-amber-700 text-white font-semibold py-2 px-3 rounded-xl text-[11px] transition shadow-2xs">
+                    <span>Open Support Ticket Form</span>
+                    <i class="fa-solid fa-arrow-up-right-from-square text-[9px]"></i>
+                </a>
+                <p class="text-[10px] text-amber-700">Include your <strong>Full Name</strong> and <strong>Student ID</strong> on the form.</p>
+            </div>
+        </div>
+    `;
+            chatHistory.insertAdjacentHTML('beforeend', html);
+            scrollToBottom();
+        }
+        function handleUserSubmit(e) {
+            e.preventDefault();
+            const input = document.getElementById('userInput');
+            const text = input.value.trim();
+            if (!text) return;
+
+            appendUserMessage(text);
+            input.value = '';
+
+            // Simulate Bot Processing
+            setTimeout(() => {
+                processQuery(text);
+            }, 500);
+        }
+
+        function sendQuickQuery(text) {
+            if (!isChatOpen) toggleChat();
+            document.getElementById('userInput').value = text;
+            handleUserSubmit(new Event('submit'));
+        }
+
+        // 1. Paste your n8n Webhook URL here (Test or Production)
+        // const N8N_WEBHOOK_URL = "https://gowaxev792.app.n8n.cloud/webhook-test/6b2f4177-7797-4ff3-aa27-975e450c5b52";
+        const N8N_WEBHOOK_URL = CONFIG.N8N_WEBHOOK_URL;
+
+        // 2. Updated async query processor connecting frontend to n8n
+        async function processQuery(query) {
+            appendTypingIndicator();
+            // Generates or retrieves a unique session ID for the current browser session
+            function getSessionId() {
+                let sessionId = sessionStorage.getItem('szabist_chat_session');
+                if (!sessionId) {
+                    sessionId = 'session_' + Math.random().toString(36).substring(2, 9);
+                    sessionStorage.setItem('szabist_chat_session', sessionId);
+                }
+                return sessionId;
+            }
+
+            try {
+                const response = await fetch(N8N_WEBHOOK_URL, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        message: query,
+                        sessionId: getSessionId(),
+                        timestamp: new Date().toISOString()
+                    })
+                });
+
+                if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
+
+                const data = await response.json();
+                removeTypingIndicator();
+
+                const replyText = data.reply || data.output || "";
+                const formUrl = CONFIG.FORM_URL;
+
+                // Intercept escalation text or link from n8n and render the UI Card
+                if (replyText.includes("forms.gle") || replyText.includes("Support Form") || data.shouldEscalate) {
+                    appendEscalationCard('Department Staff');
+                } else {
+                    appendBotMessage(replyText);
+                }
+
+            } catch (error) {
+                console.error("n8n Connection Error:", error);
+                removeTypingIndicator();
+                appendBotMessage("I am having trouble reaching the server right now. Please try again.");
+            }
+        }
+        // 3. Helpers for typing indicator state
+        function appendTypingIndicator() {
+            const chatHistory = document.getElementById('chatHistory');
+            const html = `
+        <div id="typingIndicator" class="flex items-start space-x-2.5">
+            <div class="w-7 h-7 rounded-full szabist-navy text-white flex items-center justify-center text-[10px] shrink-0 mt-0.5">
+                <i class="fa-solid fa-robot"></i>
+            </div>
+            <div class="bg-white border border-slate-200 text-slate-400 p-3 rounded-2xl rounded-tl-none max-w-[85%] shadow-2xs flex items-center space-x-1">
+                <span class="w-1.5 h-1.5 bg-slate-400 rounded-full animate-bounce"></span>
+                <span class="w-1.5 h-1.5 bg-slate-400 rounded-full animate-bounce [animation-delay:0.2s]"></span>
+                <span class="w-1.5 h-1.5 bg-slate-400 rounded-full animate-bounce [animation-delay:0.4s]"></span>
+            </div>
+        </div>
+    `;
+            chatHistory.insertAdjacentHTML('beforeend', html);
+            scrollToBottom();
+        }
+
+        function removeTypingIndicator() {
+            const indicator = document.getElementById('typingIndicator');
+            if (indicator) indicator.remove();
+        }
+
+        function scrollToBottom() {
+            const chatHistory = document.getElementById('chatHistory');
+            chatHistory.scrollTop = chatHistory.scrollHeight;
+        }
+
+        function escapeHtml(text) {
+            return text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+        }
+    </script>
+</body>
+
+</html>
