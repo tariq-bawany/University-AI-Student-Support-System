@@ -1,0 +1,564 @@
+{
+  "name": "Ticket Escalation & Email Dispatch Pipeline",
+  "nodes": [
+    {
+      "parameters": {
+        "pollTimes": {
+          "item": [
+            {
+              "mode": "everyMinute"
+            }
+          ]
+        },
+        "documentId": {
+          "__rl": true,
+          "value": "17BRLY24AkcSfHarkD6o5k1XzNdst7F5KuYX7O_7myHY",
+          "mode": "list",
+          "cachedResultName": "Szabist Student Support",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/17BRLY24AkcSfHarkD6o5k1XzNdst7F5KuYX7O_7myHY/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 1836838057,
+          "mode": "list",
+          "cachedResultName": "Form Responses 1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/17BRLY24AkcSfHarkD6o5k1XzNdst7F5KuYX7O_7myHY/edit#gid=1836838057"
+        },
+        "event": "rowAdded",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheetsTrigger",
+      "typeVersion": 1,
+      "position": [
+        736,
+        128
+      ],
+      "id": "2ae35605-8aaa-4ba8-9621-383991f31c50",
+      "name": "Google Sheets Trigger",
+      "credentials": {
+        "googleSheetsTriggerOAuth2Api": {
+          "id": "Ke3sqtZntfACcRoL",
+          "name": "Google Sheets Trigger account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=You are an administrative email assistant for SZABIST University. \nA student has submitted a support ticket. Generate a professional internal staff email subject line and body to forward this ticket to the department.\n\nSTUDENT DETAILS:\n- Name: {{ $json['Full Name '] }}\n- Student ID: {{ $json['Student ID'] }}\n- Student Email: {{ $json['Student Email'] }}\n- Department: {{ $json.Department }}\n- Raw Query: {{ $json['Query Details'] }}\n- Ticket ID: {{ $json['Ticket ID'] }}",
+        "hasOutputParser": true,
+        "batching": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chainLlm",
+      "typeVersion": 1.9,
+      "position": [
+        1568,
+        128
+      ],
+      "id": "022eeaec-fe45-4ab0-bc63-01807863d678",
+      "name": "Basic LLM Chain",
+      "retryOnFail": true,
+      "waitBetweenTries": 3000
+    },
+    {
+      "parameters": {
+        "jsonSchemaExample": "{\n  \"subject\": \"[Ticket] Brief description of the issue - Student ID\",\n  \"body\": \"Dear Department Team,\\n\\nA new student support ticket has been logged.\\n\\nStudent Details:\\n- Name: ...\\n- ID: ...\\n- Email: ...\\n\\nQuery Details:\\n...\\n\\nPlease review and respond to the student directly.\"\n}"
+      },
+      "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
+      "typeVersion": 1.3,
+      "position": [
+        1728,
+        352
+      ],
+      "id": "ec22253c-55d6-4479-869d-fbb776f1b22c",
+      "name": "Structured Output Parser"
+    },
+    {
+      "parameters": {
+        "model": "openai/gpt-oss-120b",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenRouter",
+      "typeVersion": 1,
+      "position": [
+        1552,
+        352
+      ],
+      "id": "6fb8bbe4-2081-493a-bfd6-e6280dd30bcc",
+      "name": "OpenRouter Chat Model",
+      "credentials": {
+        "openRouterApi": {
+          "id": "334gbbylmV8gbOSk",
+          "name": "OpenRouter account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "a5747a02-e729-48bf-a50d-41c03342798f",
+              "name": "Department Email",
+              "value": "",
+              "type": "string"
+            }
+          ]
+        },
+        "includeOtherFields": true,
+        "include": "selected",
+        "includeFields": "['Full Name '], ['Student ID'], ['Student Email'], Department, ['Query Details'], ['Ticket ID'], Status",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.5,
+      "position": [
+        912,
+        128
+      ],
+      "id": "5b89e56a-aa9e-4352-b9a8-06f0ecc4cf4c",
+      "name": "Edit Fields"
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForEachItem",
+        "jsCode": "// 1. Define your department-to-email map\nconst departmentEmails = {\n  'Finance': 'tariqbawany5@gmail.com',\n  'Examinations': 'tariqbawany5@gmail.com',\n  'Academics': 'tariqbawany5@gmail.com',\n  'Admissions': 'tariqbawany5@gmail.com',\n  'Records': 'tariqbawany5@gmail.com'\n};\n\n// 2. Normalize the input department string (handles casing like \"Academic\" or \"ACADEMIC\")\nconst dept =  $json.Department;\n\n// 3. Assign the mapped email, or fall back to a default email if no match is found\n $json['Department Email']= departmentEmails[dept] || 'info@yourdomain.com';\n\nreturn $json;"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1328,
+        144
+      ],
+      "id": "faf5809e-823b-49f9-94aa-f5bf7626464b",
+      "name": "Code in JavaScript"
+    },
+    {
+      "parameters": {
+        "sendTo": "={{ $('Code in JavaScript').item.json['Department Email'] }}",
+        "subject": "={{ $json.output.subject }}",
+        "emailType": "text",
+        "message": "={{ $json.output.body }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        1936,
+        128
+      ],
+      "id": "992cf020-6211-4c27-b686-bb196b66824d",
+      "name": "Send a message1",
+      "webhookId": "9fabea2d-31c2-4b57-8369-a5bd63c6a5e7",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "vh8hZZ0PTmAoth1K",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "position": [
+        1120,
+        128
+      ],
+      "id": "ee6b619a-6d78-4af5-b96f-d4a8b2914b84",
+      "name": "Loop Over Items"
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "documentId": {
+          "__rl": true,
+          "value": "17BRLY24AkcSfHarkD6o5k1XzNdst7F5KuYX7O_7myHY",
+          "mode": "list",
+          "cachedResultName": "Szabist Student Support",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/17BRLY24AkcSfHarkD6o5k1XzNdst7F5KuYX7O_7myHY/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 1836838057,
+          "mode": "list",
+          "cachedResultName": "Form Responses 1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/17BRLY24AkcSfHarkD6o5k1XzNdst7F5KuYX7O_7myHY/edit#gid=1836838057"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Ticket ID": "={{ $('Code in JavaScript').item.json['Ticket ID'] }}",
+            "Status": "Sent"
+          },
+          "matchingColumns": [
+            "Ticket ID"
+          ],
+          "schema": [
+            {
+              "id": "Timestamp",
+              "displayName": "Timestamp",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Email Address",
+              "displayName": "Email Address",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Full Name ",
+              "displayName": "Full Name ",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Student ID",
+              "displayName": "Student ID",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Student Email",
+              "displayName": "Student Email",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Department",
+              "displayName": "Department",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Query Details",
+              "displayName": "Query Details",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Ticket ID",
+              "displayName": "Ticket ID",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Status",
+              "displayName": "Status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "row_number",
+              "displayName": "row_number",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "readOnly": true,
+              "removed": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        2448,
+        112
+      ],
+      "id": "07b1350f-dac2-490f-b5ad-065d9263d73e",
+      "name": "Update row in sheet",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "91YPTMwfM6q274jD",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "content": "- fetch live google sheet trigger \n- edit fields\n- set department email according to the department filed value\n",
+        "height": 432,
+        "width": 820
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        672,
+        -80
+      ],
+      "id": "ddb4209f-00df-4eae-94e0-d763a179598a",
+      "name": "Sticky Note"
+    },
+    {
+      "parameters": {
+        "content": "writes an email using the form data for the relative department to handle the student query",
+        "height": 432,
+        "width": 384
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        1504,
+        -80
+      ],
+      "id": "ffadf4da-baa8-4c9f-b6f7-bd7adcde8520",
+      "name": "Sticky Note1"
+    },
+    {
+      "parameters": {
+        "content": "send email to the student using simple template\nsend ai generated email to department",
+        "height": 432,
+        "width": 288
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        1904,
+        -80
+      ],
+      "id": "621b7443-6308-4f11-ad9a-aba9e1bb2ec1",
+      "name": "Sticky Note2"
+    },
+    {
+      "parameters": {
+        "sendTo": "={{ $json['Student Email'] }}",
+        "subject": "=Ticket Logged [#{{ $json['Ticket ID'] }}]: SZABIST {{ $json.Department }} Support",
+        "emailType": "text",
+        "message": "=Dear {{ $json['Full Name '] }},\n\nWe have received your query and successfully logged your support ticket with the {{ $json.Department }} department. \n\nTicket ID: #{{ $json['Ticket ID'] }}\nQuery Summary: \"{{ $json['Query Details'] }}\"\n\nA representative from the {{ $json.Department }} department will review your ticket and reply directly to your email address shortly. Please keep your Ticket ID for future reference.\n\nBest regards,\nSZABIST AI Student Support System\n\n---\nThis is an automated receipt. Please do not reply directly to this email.",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        2064,
+        32
+      ],
+      "id": "85f08727-ff3d-4d12-a05d-05837b8d77b7",
+      "name": "Send a message",
+      "webhookId": "128f2b08-b579-48c8-8aec-c0a7a9ddd2dd",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "vh8hZZ0PTmAoth1K",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "mode": "chooseBranch",
+        "useDataOfInput": 2
+      },
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        2272,
+        112
+      ],
+      "id": "adf6bee6-34c8-49b3-a3c7-2919ebfb293b",
+      "name": "Merge"
+    },
+    {
+      "parameters": {
+        "content": "used merge so both branches can execute then google sheet is updated",
+        "height": 432,
+        "width": 400
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        2208,
+        -80
+      ],
+      "id": "2a0cf40f-d1c5-475d-a233-c0b42356762a",
+      "name": "Sticky Note3"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Google Sheets Trigger": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Structured Output Parser": {
+      "ai_outputParser": [
+        [
+          {
+            "node": "Basic LLM Chain",
+            "type": "ai_outputParser",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenRouter Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Basic LLM Chain",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript": {
+      "main": [
+        [
+          {
+            "node": "Basic LLM Chain",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Send a message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Basic LLM Chain": {
+      "main": [
+        [
+          {
+            "node": "Send a message1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Loop Over Items": {
+      "main": [
+        [],
+        [
+          {
+            "node": "Code in JavaScript",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send a message1": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Update row in sheet": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send a message": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Merge": {
+      "main": [
+        [
+          {
+            "node": "Update row in sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "c4099be9-fb4c-4df4-af55-9ef33fc8e7d3",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "535af209ee04d96ef405bf9fe7efb95194a6d53d444ad3c3be4fd6e50e73a4bd"
+  },
+  "nodeGroups": [],
+  "id": "YgGb87tHw8krCLVm",
+  "tags": []
+}

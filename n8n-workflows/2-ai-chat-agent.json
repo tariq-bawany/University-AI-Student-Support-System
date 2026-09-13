@@ -1,0 +1,471 @@
+{
+  "name": "AI Chat Agent",
+  "nodes": [
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $json.body.message }}",
+        "needsFallback": true,
+        "options": {
+          "systemMessage": "You are the official SZABIST AI Student Support Assistant. You must process queries using the following strict logic:\n\n### RULE 1: ANSWER (General/Public Queries)\nIf the query asks about general university policies, schedules, or public information AND the answer is explicitly in your provided context:\n- Answer politely and concisely (under 150 words).\n- Use clean Markdown for formatting (headers `###`, tables `| |`, short bullet points, and `> ⚠️ **Note:**` for warnings).\n- Do NOT use HTML or code blocks.\n- Do NOT fabricate information. \n\n### RULE 2: ESCALATE (Personal/Actionable/Unknown Queries)\nIf the query involves personal records (grades, attendance, fee status), requires administrative action (challans, transcripts), expresses frustration, requests human contact, OR if the answer is NOT in your context:\n- You MUST NOT attempt to answer. \n- You MUST output ONLY the exact text below with no preamble or additional formatting.\n\nI cannot process this request directly, but our department staff can help you. Please submit a formal support ticket here: https://forms.gle/CW1i5joik5YJXDxQA\n\nMake sure to select the correct Department and include your Full Name and Student ID so the team can review your file and email you back directly."
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        384,
+        336
+      ],
+      "id": "dd2cdf3e-4268-4fa6-b3e1-8068237fcd10",
+      "name": "AI Agent",
+      "alwaysOutputData": false,
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "6b2f4177-7797-4ff3-aa27-975e450c5b52",
+        "responseMode": "responseNode",
+        "options": {
+          "allowedOrigins": "*",
+          "responseHeaders": {
+            "entries": [
+              {
+                "name": "Access-Control-Allow-Origin",
+                "value": "*"
+              },
+              {
+                "name": "Access-Control-Allow-Headers",
+                "value": "Content-Type, Authorization"
+              },
+              {
+                "name": "Access-Control-Allow-Methods",
+                "value": "POST, OPTIONS"
+              }
+            ]
+          }
+        }
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        -192,
+        368
+      ],
+      "id": "58fc4548-2192-48b0-add6-2167a5679f66",
+      "name": "Webhook",
+      "webhookId": "6b2f4177-7797-4ff3-aa27-975e450c5b52"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "ac0a7ad9-ce27-49b0-815e-a47a052e56c9",
+              "leftValue": "={{ $json.body.message }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "notEmpty",
+                "singleValue": true
+              }
+            },
+            {
+              "id": "58841518-0a6e-4227-8092-ac20cfd07712",
+              "leftValue": "={{ $json.body.sessionId }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "exists",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        32,
+        368
+      ],
+      "id": "6ce3082a-7e36-4cfa-bd2b-bb8f1ed3c1df",
+      "name": "SessionId exists?"
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "{ \"reply\": \"Invalid request parameters.\" }",
+        "options": {
+          "responseCode": 400
+        }
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [
+        32,
+        592
+      ],
+      "id": "849abeec-de3d-45a9-a7e4-42fa0c74a7c2",
+      "name": "fall back error"
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ { \"reply\": $json.output } }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [
+        912,
+        320
+      ],
+      "id": "9c32e074-d10b-403a-9385-c6b229497fd4",
+      "name": "return answer"
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "{\n  \"reply\": \"Our knowledge base is currently updating. If your query is urgent, please submit a support ticket. \\nLink: https://forms.gle/CW1i5joik5YJXDxQA\"\n}\n",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [
+        1088,
+        352
+      ],
+      "id": "8dc78712-b65f-441a-83f6-3dac6bf1834d",
+      "name": "escalate error msg"
+    },
+    {
+      "parameters": {
+        "mode": "retrieve-as-tool",
+        "toolDescription": "Use this tool to search official SZABIST university rules, GPA/CGPA formulas, fee structures, late fee rules, faculty details, Program Manager contacts, and academic policies.",
+        "pineconeIndex": {
+          "__rl": true,
+          "value": "university-knowledge",
+          "mode": "list",
+          "cachedResultName": "university-knowledge"
+        },
+        "topK": 3,
+        "options": {
+          "pineconeNamespace": ""
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.vectorStorePinecone",
+      "typeVersion": 1.3,
+      "position": [
+        576,
+        512
+      ],
+      "id": "d1ea763d-32b0-4f19-9c39-9732155552b0",
+      "name": "pinecone database",
+      "credentials": {
+        "pineconeApi": {
+          "id": "LVp8ZhpRldjD5I0r",
+          "name": "Pinecone account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "modelName": "BAAI/bge-m3",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.embeddingsHuggingFaceInference",
+      "typeVersion": 1,
+      "position": [
+        704,
+        640
+      ],
+      "id": "0a069d03-5a22-4e0d-a4f1-896b142c5188",
+      "name": "HuggingFace bme-m3",
+      "credentials": {
+        "huggingFaceApi": {
+          "id": "VDwYtFYv5KrJmWJe",
+          "name": "Hugging Face account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sessionIdType": "customKey",
+        "sessionKey": "={{ $json.body.sessionId }}",
+        "contextWindowLength": 6
+      },
+      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+      "typeVersion": 1.4,
+      "position": [
+        480,
+        608
+      ],
+      "id": "96f91f0b-592d-4f28-9f90-794fdaa8a066",
+      "name": "Memory"
+    },
+    {
+      "parameters": {
+        "model": "openrouter/free",
+        "options": {
+          "temperature": 0.1
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenRouter",
+      "typeVersion": 1,
+      "position": [
+        272,
+        608
+      ],
+      "id": "b5441f4e-78ee-4f5a-8e0c-634c5d6a957f",
+      "name": "open router free",
+      "credentials": {
+        "openRouterApi": {
+          "id": "334gbbylmV8gbOSk",
+          "name": "OpenRouter account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "model": "openai/gpt-oss-120b",
+        "options": {
+          "temperature": 0.1
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGroq",
+      "typeVersion": 1,
+      "position": [
+        384,
+        640
+      ],
+      "id": "d9c5982f-a819-483a-a9a1-c31564e3a786",
+      "name": "groq gpt oss fallback",
+      "credentials": {
+        "groqApi": {
+          "id": "uLgusJNDXJ6KQChv",
+          "name": "n8n api key , tariqbawany5"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "content": "search vector database and result ai written answer ",
+        "height": 592,
+        "width": 624
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        224,
+        192
+      ],
+      "id": "72d3fcd8-7f47-424f-a45e-6b5da2329db7",
+      "name": "Sticky Note"
+    },
+    {
+      "parameters": {
+        "content": "checks for session id if no send a fallback error",
+        "height": 592
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -48,
+        192
+      ],
+      "id": "c7e8f325-bfbd-4af8-9ac2-c99585be96e7",
+      "name": "Sticky Note1"
+    },
+    {
+      "parameters": {
+        "content": "returns the final answer \n- error if ai agent node fails\n- answer if ai agent completed the query",
+        "height": 592,
+        "width": 416
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        864,
+        192
+      ],
+      "id": "0d159996-de0d-418e-a008-41b181c11dfc",
+      "name": "Sticky Note2"
+    }
+  ],
+  "pinData": {
+    "Webhook": [
+      {
+        "json": {
+          "headers": {
+            "host": "gowaxev792.app.n8n.cloud",
+            "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/153.0.0.0 Safari/537.36",
+            "content-length": "112",
+            "accept": "*/*",
+            "accept-encoding": "gzip, br",
+            "accept-language": "en-GB,en;q=0.8",
+            "cdn-loop": "cloudflare; loops=1; subreqs=1",
+            "cf-connecting-ip": "39.34.144.134",
+            "cf-ew-via": "15",
+            "cf-ipcountry": "PK",
+            "cf-ray": "a3a83753eab17a39-KHI",
+            "cf-visitor": "{\"scheme\":\"https\"}",
+            "cf-worker": "n8n.cloud",
+            "content-type": "application/json",
+            "origin": "http://127.0.0.1:3000",
+            "priority": "u=1, i",
+            "referer": "http://127.0.0.1:3000/",
+            "sec-ch-ua": "\"Brave\";v=\"153\", \"Not_A Brand\";v=\"8\", \"Chromium\";v=\"153\"",
+            "sec-ch-ua-mobile": "?0",
+            "sec-ch-ua-platform": "\"Windows\"",
+            "sec-fetch-dest": "empty",
+            "sec-fetch-mode": "cors",
+            "sec-fetch-site": "cross-site",
+            "sec-gpc": "1",
+            "x-forwarded-for": "39.34.144.134, 104.22.96.142",
+            "x-forwarded-host": "gowaxev792.app.n8n.cloud",
+            "x-forwarded-port": "443",
+            "x-forwarded-proto": "https",
+            "x-forwarded-server": "traefik-prod-users-gwc-77-684f686786-kkqh4",
+            "x-is-trusted": "yes",
+            "x-real-ip": "39.34.144.134"
+          },
+          "params": {},
+          "query": {},
+          "body": {
+            "message": "how do i apply for transcript",
+            "sessionId": "session_w2gk5we",
+            "timestamp": "2026-09-13T15:34:27.567Z"
+          },
+          "webhookUrl": "https://gowaxev792.app.n8n.cloud/webhook/6b2f4177-7797-4ff3-aa27-975e450c5b52",
+          "executionMode": "production"
+        }
+      }
+    ]
+  },
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "SessionId exists?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent": {
+      "main": [
+        [
+          {
+            "node": "return answer",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "escalate error msg",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "SessionId exists?": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "fall back error",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "pinecone database": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HuggingFace bme-m3": {
+      "ai_embedding": [
+        [
+          {
+            "node": "pinecone database",
+            "type": "ai_embedding",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Memory": {
+      "ai_memory": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "open router free": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "groq gpt oss fallback": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 1
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "3fd138da-5157-4fd9-a361-5a326775d4a6",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "535af209ee04d96ef405bf9fe7efb95194a6d53d444ad3c3be4fd6e50e73a4bd"
+  },
+  "nodeGroups": [],
+  "id": "cqMSMf9IOg7gC06d",
+  "tags": []
+}
