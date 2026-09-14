@@ -1,6 +1,6 @@
 # University AI Student Support System
 
-An event-driven, production-ready RAG chatbot and automated ticket dispatch system. Built with **n8n**, **OpenRouter**, **Pinecone**, and modular **JavaScript**, this system provides instant AI answers for general academic/campus inquiries while deterministically escalating complex administrative requests to department staff via structured ticket dispatching.
+An event-driven, MVP / production-oriented architecture RAG chatbot and automated ticket dispatch system. Built with **n8n**, **OpenRouter**, **Pinecone**, and modular **JavaScript**, this system provides instant AI answers for general academic/campus inquiries while deterministically escalating complex administrative requests to department staff via structured ticket dispatching.
 
 ---
 
@@ -30,8 +30,8 @@ The project consists of a lightweight, modular frontend and a 3-part backend orc
 
 ## ✨ Key Engineering Highlights
 
-* **Deterministic LLM Intent Routing:** Utilizes a zero-temperature LLM configuration (`temperature: 0`) and hardened system prompts to enforce strict separation between general public queries (answered via RAG) and actionable administrative requests (escalated to humans).
-* **Collision-Proof Audit Trail:** Integrates an `ARRAYFORMULA` in Google Sheets to assign unique sequential `Ticket ID`s dynamically upon form submission, preventing race conditions if multiple students submit forms simultaneously.
+* **Structured LLM-based intent routing:** Utilizes a zero-temperature LLM configuration (`temperature: 0`) and hardened system prompts to enforce strict separation between general public queries (answered via RAG) and actionable administrative requests (escalated to humans).
+* **Row-derived Ticket ID generation:** Integrates an `ARRAYFORMULA` in Google Sheets to assign unique sequential `Ticket ID`s dynamically upon form submission, preventing race conditions if multiple students submit forms simultaneously.
 * **Decoupled Security Pattern:** Implements the `config.example.js` / `config.js` design pattern combined with `.gitignore` to prevent credential exposure in public repositories.
 * **Modular Frontend Architecture:** Built with clean separation of concerns (`index.html` structure, `script.js` application logic, and `config.js` settings) featuring real-time Markdown rendering via Marked.js.
 
@@ -135,3 +135,20 @@ To enable automated ticket ID assignment and prevent concurrency collisions:
 
 
 4. Configure the **Update Row in Sheet** node in Workflow 3 to match rows by **Key Column** set to `Ticket ID`.
+
+## ⚠️ Current MVP Limitations
+
+This project is an educational MVP built to explore RAG,
+LLM-based routing, and n8n workflow automation.
+
+It is not intended for direct production deployment.
+
+Current limitations include:
+
+- No student authentication
+- No persistent conversation database
+- LLM-based intent classification may misclassify edge cases
+- Google Sheets is used as the ticket audit layer
+- No formal RAG evaluation benchmark
+- No production monitoring or observability
+- No enterprise access-control layer
