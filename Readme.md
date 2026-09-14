@@ -24,6 +24,9 @@ The project consists of a lightweight, modular frontend and a 3-part backend orc
 ```
 
 ---
+| Chatbot RAG Answer | Ticket Escalation Card |
+| :---: | :---: |
+| ![RAG Chat Demo](assets/chat-demo.png) | ![Escalation Demo](assets/escalation-card.png) |
 
 ## ✨ Key Engineering Highlights
 
@@ -38,6 +41,12 @@ The project consists of a lightweight, modular frontend and a 3-part backend orc
 
 ```text
 .
+├── assets/                  # Images and GIFs for README documentation
+│   ├── chat-demo.png
+│   ├── escalation-card.png
+│   ├── workflow-1-ingestion.png
+│   ├── workflow-2-agent.png
+│   └── workflow-3-dispatch.png
 ├── index.html               # Main user interface & chat widget structure
 ├── script.js                # Application logic, async requests & DOM rendering
 ├── config.example.js        # Environment template for endpoints (Tracked by Git)
@@ -57,16 +66,19 @@ The project consists of a lightweight, modular frontend and a 3-part backend orc
 
 ### 1. Knowledge Base Ingestion (`1-knowledge-base-ingestion.json`)
 
+![Knowledge Base Ingestion Canvas](assets/workflow-1-ingestion.png)
 * **Purpose:** Parses university documentation (PDFs, policies, FAQs), generates text embeddings, and indexes them into Pinecone.
 * **Key Nodes:** Read Binary Files, Text Splitter, OpenRouter / OpenAI Embeddings, Pinecone Vector Store.
 
 ### 2. AI Chat Agent (`2-ai-chat-agent.json`)
 
+![AI Chat Agent Canvas](assets/workflow-2-agent.png)
 * **Purpose:** Acts as the backend for the frontend widget. Handles CORS, retrieves vector context, evaluates student intent, and formats response payloads.
 * **Key Nodes:** Webhook Trigger, Pinecone Vector Store (Retriever), OpenRouter / Basic LLM Chain, Respond to Webhook (JSON & CORS header configuration).
 
 ### 3. Ticket Dispatch System (`3-ticket-dispatch-system.json`)
 
+![Ticket Dispatch System Canvas](assets/workflow-3-dispatch.png)
 * **Purpose:** Triggers when an escalated Google Form is submitted. Iterates over submission items, dispatches departmental emails, generates confirmation receipts for students, and updates Google Sheets with audit statuses.
 * **Key Nodes:** Google Sheets Trigger, Loop Over Items, Code Node (Branch Routing), Gmail (Department & Student Receipts), Google Sheets Update Row.
 
